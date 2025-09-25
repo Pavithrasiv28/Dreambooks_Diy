@@ -1,0 +1,258 @@
+"use client";
+import { Stage, Layer, Rect, Circle, Line, Ellipse, Star, Arrow, Transformer, Image as KonvaImage, Text} from "react-konva";
+import { useState, useRef, useEffect } from "react";
+import useImage from "use-image";
+
+// Separate component for Sticker
+function Sticker({ shape, ...commonProps }) {
+
+  const [image] = useImage(shape.src); // hook is called consistently for each Sticker
+  return <KonvaImage {...commonProps} image={image} width={shape.width || 80} height={shape.height || 80} />;
+}
+
+export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,texts, setTexts }) {
+  const [selectedShape, setSelectedShape] = useState(null);
+  const [editingTextId, setEditingTextId] = useState(null);
+  const [textValue, setTextValue] = useState("");
+  const transformerRef = useRef();
+  const layerRef = useRef();
+
+  // Background image
+  const [bgImage] = useImage(canvasBg.type === "image" ? canvasBg.src : null);
+
+  // Drag handler
+  const handleDragEnd = (idx, e) => {
+    const newShapes = [...shapes];
+    newShapes[idx] = { ...newShapes[idx], x: e.target.x(), y: e.target.y() };
+    setShapes(newShapes);
+  };
+
+  // Delete shape
+  const handleDelete = () => {
+  if (!selectedShape) return;
+
+  if (selectedShape.startsWith("shape-")) {
+    // shape deletion
+    const idx = Number(selectedShape.split("-")[1]);
+    setShapes(shapes.filter((_, i) => i !== idx));
+  } else if (selectedShape.startsWith("text-")) {
+    // text deletion
+    const textId = Number(selectedShape.split("-")[1]);
+    setTexts(texts.filter(t => t.id !== textId));
+  }
+
+  setSelectedShape(null);
+};
+
+
+
+  // Duplicate shape
+  const handleDuplicate = () => {
+  if (!selectedShape) return;
+
+  if (selectedShape.startsWith("shape-")) {
+    const idx = Number(selectedShape.split("-")[1]);
+    const newShapes = [...shapes];
+    const shapeToDuplicate = {
+      ...shapes[idx],
+      x: (shapes[idx].x || 50) + 20,
+      y: (shapes[idx].y || 50) + 20,
+    };
+    newShapes.push(shapeToDuplicate);
+    setShapes(newShapes);
+  } else if (selectedShape.startsWith("text-")) {
+    const textId = Number(selectedShape.split("-")[1]);
+    const textToDuplicate = texts.find(t => t.id === textId);
+    if (textToDuplicate) {
+      const newText = {
+        ...textToDuplicate,
+        id: Date.now(),
+        x: textToDuplicate.x + 20,
+        y: textToDuplicate.y + 20,
+      };
+      setTexts([...texts, newText]);
+    }
+  }
+};
+
+  // Update transformer
+   useEffect(() => {
+  const layer = layerRef.current;
+  const tr = transformerRef.current;
+
+  if (selectedShape !== null && tr) {
+    const selectedNode = layer.findOne(`#${selectedShape}`);
+    if (selectedNode) {
+      tr.nodes([selectedNode]);
+      tr.getLayer().batchDraw();
+    }
+  } else if (tr) {
+    tr.nodes([]);
+    tr.getLayer().batchDraw();
+  }
+  }, [selectedShape, shapes, texts]);
+
+  return (
+    <div className="relative w-full h-[80%] py-5 flex justify-center items-center">
+      {selectedShape !== null && (
+        <div className="absolute top-2 right-2 flex gap-2 z-10">
+          <button onClick={handleDuplicate} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+            Duplicate
+          </button>
+          <button onClick={handleDelete} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+            Delete
+          </button>
+        </div>
+      )}
+
+      <Stage
+        width={canvasSize.width}
+        height={canvasSize.height}
+        className="bg-white border"
+        onMouseDown={(e) => {
+          if (e.target === e.target.getStage()) setSelectedShape(null);
+        }}
+      >
+        <Layer ref={layerRef}>
+          {/* Background */}
+          <Rect
+            x={0}
+            y={0}
+            width={canvasSize.width}
+            height={canvasSize.height}
+            {...(canvasBg.type === "solid"
+              ? { fill: canvasBg.color }
+              : canvasBg.type === "gradient"
+              ? {
+                  fillLinearGradientStartPoint: { x: 0, y: 0 },
+                  fillLinearGradientEndPoint: { x: canvasSize.width, y: 0 },
+                  fillLinearGradientColorStops: canvasBg.colors,
+                }
+              : canvasBg.type === "image" && bgImage
+              ? {
+                  fillPatternImage: bgImage,
+                  fillPatternScale: {
+                    x: canvasSize.width / bgImage.width,
+                    y: canvasSize.height / bgImage.height,
+                  },
+                  fillPatternRepeat: "no-repeat",
+                }
+              : {}
+            )}
+          />
+
+          {/* Render shapes */}
+          {shapes.map((shape, idx) => {
+            const commonProps = {
+              key: idx,
+              id: `shape-${idx}`,
+              x: shape.x || 50,
+              y: shape.y || 50,
+              draggable: true,
+              onDragEnd: (e) => handleDragEnd(idx, e),
+              onClick: () => setSelectedShape(`shape-${idx}`),
+              onTap: () => setSelectedShape(`shape-${idx}`),
+            };
+
+            switch (shape.type) {
+              case "Rect":
+                return <Rect {...commonProps} width={shape.width || 100} height={shape.height || 60} fill={shape.color || "black"} />;
+              case "Circle":
+                return <Circle {...commonProps} radius={shape.radius || 50} fill={shape.color || "black"} />;
+              case "Triangle":
+                return <Line {...commonProps} points={[0, 50, 50, 50, 25, 0]} closed fill={shape.color || "black"} />;
+              case "Ellipse":
+                return <Ellipse {...commonProps} radiusX={shape.radiusX || 50} radiusY={shape.radiusY || 30} fill={shape.color || "black"} />;
+              case "Line":
+                return <Line {...commonProps} points={shape.points || [0, 0, 100, 0]} stroke={shape.color || "black"} strokeWidth={3} />;
+              case "Polygon":
+                return <Line {...commonProps} points={shape.points || [0, 50, 25, 0, 50, 50, 25, 25]} closed fill={shape.color || "black"} />;
+              case "Star":
+                return <Star {...commonProps} numPoints={5} innerRadius={shape.innerRadius || 10} outerRadius={shape.outerRadius || 25} fill={shape.color || "black"} />;
+              case "Arrow":
+                return <Arrow {...commonProps} points={shape.points || [0, 0, 100, 0]} pointerLength={10} pointerWidth={10} fill={shape.color || "black"} stroke={shape.color || "black"} />;
+              case "Sticker":
+                return <Sticker {...commonProps} shape={shape} />;
+              default:
+                return null;
+            }
+          })}
+
+            {texts.map((t, idx) => (
+  <Text
+    key={t.id}
+    id={`text-${t.id}`}
+    x={t.x}
+    y={t.y}
+    text={t.text}
+    fontSize={t.fontSize}
+    fontFamily={t.fontFamily}
+    fill={t.color || "black"}
+    draggable
+    onDragEnd={(e) => {
+      const newTexts = [...texts];
+      newTexts[idx] = { ...newTexts[idx], x: e.target.x(), y: e.target.y() };
+      setTexts(newTexts);
+    }}
+    onClick={() => setSelectedShape(`text-${t.id}`)}
+    onTap={() => setSelectedShape(`text-${t.id}`)}
+    onDblClick={(e) => {
+      e.cancelBubble = true; // prevent stage deselect
+      setEditingTextId(t.id);
+      setTextValue(t.text);
+
+      const stageBox = e.target.getStage().container().getBoundingClientRect();
+      const textarea = document.createElement("textarea");
+      document.body.appendChild(textarea);
+
+      textarea.value = t.text;
+      textarea.style.position = "absolute";
+      textarea.style.top = stageBox.top + t.y + "px";
+      textarea.style.left = stageBox.left + t.x + "px";
+      textarea.style.fontSize = t.fontSize + "px";
+      textarea.style.fontFamily = t.fontFamily;
+      textarea.style.border = "1px solid #ddd";
+      textarea.style.padding = "2px";
+      textarea.style.margin = "0";
+      textarea.style.background = "white";
+      textarea.style.color = t.color || "black";
+      textarea.style.overflow = "hidden";
+      textarea.style.width = t.text.length * (t.fontSize / 2) + "px";
+
+      textarea.focus();
+
+      const removeTextarea = () => {
+        const newTexts = [...texts];
+        newTexts[idx] = { ...newTexts[idx], text: textarea.value };
+        setTexts(newTexts);
+        setEditingTextId(null);
+        document.body.removeChild(textarea);
+      };
+
+      textarea.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          removeTextarea();
+        }
+      });
+
+      textarea.addEventListener("blur", removeTextarea);
+      
+    }}
+  />
+))}
+
+
+          {/* Transformer */}
+          <Transformer
+            ref={transformerRef}
+            rotateEnabled
+            enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+            anchorSize={8}
+            borderStroke="blue"
+            borderDash={[4, 4]}
+          />
+        </Layer>
+      </Stage>
+    </div>
+  );
+}

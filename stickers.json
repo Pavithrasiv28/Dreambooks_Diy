@@ -1,0 +1,51 @@
+[
+  {
+    "category" : "Emojis and Reactions",
+    "stickers" : [
+        {"id":1, "src": "https://openmoji.org/data/color/svg/1F600.svg"},
+        {"id":2, "src": "https://openmoji.org/data/color/svg/1F606.svg"},
+        {"id":3, "src": "https://openmoji.org/data/color/svg/1F602.svg"},
+        {"id":4, "src": "https://openmoji.org/data/color/svg/1F929.svg"},
+        {"id":5, "src": "https://openmoji.org/data/color/svg/1F633.svg"},
+        {"id":6, "src": "https://openmoji.org/data/color/svg/1F609.svg"},
+        {"id":7, "src": "https://openmoji.org/data/color/svg/E282.svg"},
+        {"id":8, "src": "https://openmoji.org/data/color/svg/1F635.svg"},
+        {"id":9, "src": "https://openmoji.org/data/color/svg/1F61D.svg"},
+        {"id":10, "src": "https://openmoji.org/data/color/svg/1F61A.svg"}
+    ]
+  },
+  {
+    "category": "Animals & Nature",
+    "stickers": [
+      { "id": 11, "src": "https://openmoji.org/data/color/svg/1F419.svg" },
+      { "id": 12, "src": "https://openmoji.org/data/color/svg/1F426.svg" },
+      { "id": 13, "src": "https://openmoji.org/data/color/svg/1F98D.svg" },
+      { "id": 14, "src": "https://openmoji.org/data/color/svg/1F412.svg" },
+      { "id": 15, "src": "https://openmoji.org/data/color/svg/1F9A6.svg" },
+      { "id": 16, "src": "https://openmoji.org/data/color/svg/1F414.svg" },
+      { "id": 17, "src": "https://openmoji.org/data/color/svg/1F424.svg" },
+      { "id": 18, "src": "https://openmoji.org/data/color/svg/1F99C.svg" },
+      { "id": 19, "src": "https://openmoji.org/data/color/svg/1F430.svg" },
+      { "id": 20, "src": "https://openmoji.org/data/color/svg/1F335.svg" },
+      { "id": 21, "src": "https://openmoji.org/data/color/svg/1F333.svg" },
+      { "id": 22, "src": "https://openmoji.org/data/color/svg/1F95D.svg" },
+      { "id": 23, "src": "https://openmoji.org/data/color/svg/1FAB7.svg" },
+      { "id": 24, "src": "https://openmoji.org/data/color/svg/1F30B.svg" },
+      { "id": 25, "src": "https://openmoji.org/data/color/svg/1F33C.svg" }
+      
+    ]
+  },
+  {
+    "category": "Symbols",
+    "stickers": [
+      { "id": 26,  "src": "https://openmoji.org/data/color/svg/2B50.svg" },
+      { "id": 27, "src": "https://openmoji.org/data/color/svg/2764.svg" },
+      { "id": 28, "src": "https://openmoji.org/data/color/svg/1F5FF.svg" },
+      { "id": 29, "src": "https://openmoji.org/data/color/svg/274C.svg" },
+      { "id": 30, "src": "https://openmoji.org/data/color/svg/2714.svg" },
+      { "id": 31, "src": "https://openmoji.org/data/color/svg/26D4.svg" },
+      { "id": 32, "src": "https://openmoji.org/data/color/svg/1F6AB.svg" },
+      { "id": 33, "src": "https://openmoji.org/data/color/svg/262F.svg" }
+    ]
+  } 
+]

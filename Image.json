@@ -1,0 +1,22 @@
+[
+  { "id": 1, "src": "/background/blue-wall.jpg", "name": "blue-wall" },
+  { "id": 2, "src": "/background/Crime.jpg", "name": "Crime" },
+  { "id": 3, "src": "/background/door.jpg", "name": "door" },
+  { "id": 4, "src": "/background/ghost.jpg", "name": "ghost" },
+  { "id": 5, "src": "/background/grunge_room.jpg", "name": "grunge_room" },
+  { "id": 6, "src": "/background/haunted.jpg", "name": "haunted" },
+  { "id": 7, "src": "/background/highlight.jpg", "name": "highlight" },
+  { "id": 8, "src": "/background/love.jpg", "name": "love" },
+  { "id": 9, "src": "/background/magenta.jpg", "name": "magenta" },
+  { "id": 10, "src": "/background/paper-crush.jpg", "name": "paper-crush" },
+  { "id": 11, "src": "/background/poster.jpg", "name": "poster" },
+  { "id": 12, "src": "/background/red-fabric-texture.jpg", "name": "red-fabric-texture" },
+  { "id": 13, "src": "/background/rise.jpg", "name": "rise" },
+  { "id": 14, "src": "/background/shine.jpg", "name": "shine" },
+  { "id": 15, "src": "/background/simple.jpg", "name": "simple" },
+  { "id": 16, "src": "/background/sky.jpg", "name": "sky" },
+  { "id": 17, "src": "/background/Textture.jpg", "name": "Textture" },
+  { "id": 18, "src": "/background/texture-theme.jpg", "name": "texture-theme" },
+  { "id": 19, "src": "/background/wood.jpg", "name": "wood" }
+
+]
