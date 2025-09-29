@@ -37,8 +37,8 @@ export default function RootLayout({ children }) {
               {/* <button className="h-full w-50 bg-green-300">Book Cover</button>
               <button className="text-black h-full w-50">ManuScript</button> */}
            </div>
-           <div className="w-50 h-full bg-amber-950">
-
+           <div className="w-30 h-full border-1 border-red-600 flex justify-center items-center">
+            SAVE
            </div>
         </header>
 
