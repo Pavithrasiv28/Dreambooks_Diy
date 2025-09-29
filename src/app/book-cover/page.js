@@ -1,6 +1,6 @@
 "use client";
 import { Stage, Layer, Rect, Circle, Line, Ellipse, Star, Arrow, Transformer, Image as KonvaImage, Text} from "react-konva";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef} from "react";
 import useImage from "use-image";
 
 // Separate component for Sticker
@@ -10,12 +10,42 @@ function Sticker({ shape, ...commonProps }) {
   return <KonvaImage {...commonProps} image={image} width={shape.width || 80} height={shape.height || 80} />;
 }
 
-export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,texts, setTexts }) {
-  const [selectedShape, setSelectedShape] = useState(null);
+const CanvasArea = forwardRef(({ canvasSize, shapes, setShapes, canvasBg, texts, setTexts, selectedId, setSelectedTextId, textColor }, ref) => {
   const [editingTextId, setEditingTextId] = useState(null);
+  const [selectedShape, setSelectedShape] = useState(null);
   const [textValue, setTextValue] = useState("");
   const transformerRef = useRef();
   const layerRef = useRef();
+  const internalRef = useRef(null);
+  const stageRef = useRef(null)
+
+ useEffect(() => {
+  if (ref) {
+    ref.current = stageRef.current; 
+  }
+}, [ref, stageRef]);
+
+// mouse down transformer vanish
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (!stageRef.current) return;
+
+    // Check if the click is outside the stage container
+    if (!stageRef.current.container().contains(e.target)) {
+      setSelectedShape(null);
+      setSelectedTextId(null);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
+
+  
 
   // Background image
   const [bgImage] = useImage(canvasBg.type === "image" ? canvasBg.src : null);
@@ -43,6 +73,18 @@ export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,tex
 
   setSelectedShape(null);
 };
+
+useEffect(() => {
+  if (textColor && selectedId !== null) {
+    setTexts(prevTexts =>
+      prevTexts.map(t =>
+        t.id === selectedId
+          ? { ...t, color: textColor } // only change currently selected text
+          : t
+      )
+    );
+  }
+}, [textColor, selectedId]); // selectedId must always be the one currently selected
 
 
 
@@ -93,7 +135,7 @@ export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,tex
   }, [selectedShape, shapes, texts]);
 
   return (
-    <div className="relative w-full h-[80%] py-5 flex justify-center items-center">
+    <div className="relative w-full h-[82%] py-5 flex justify-center items-center">
       {selectedShape !== null && (
         <div className="absolute top-2 right-2 flex gap-2 z-10">
           <button onClick={handleDuplicate} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
@@ -108,22 +150,27 @@ export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,tex
       <Stage
         width={canvasSize.width}
         height={canvasSize.height}
+        ref={stageRef}
         className="bg-white border"
         onMouseDown={(e) => {
-          if (e.target === e.target.getStage()) setSelectedShape(null);
-        }}
-      >
+            if (e.target === e.target.getStage()) {
+                setSelectedShape(null);    // 🔹 keep old
+                setSelectedTextId(null);   // ✅ new (hide bar)
+              }
+      }}                                          
+>              
+                  
         <Layer ref={layerRef}>
           {/* Background */}
           <Rect
             x={0}
-            y={0}
+            y={0}   
             width={canvasSize.width}
-            height={canvasSize.height}
+            height={canvasSize.height}                                                      
             {...(canvasBg.type === "solid"
               ? { fill: canvasBg.color }
-              : canvasBg.type === "gradient"
-              ? {
+              : canvasBg.type === "gradient"       
+              ? { 
                   fillLinearGradientStartPoint: { x: 0, y: 0 },
                   fillLinearGradientEndPoint: { x: canvasSize.width, y: 0 },
                   fillLinearGradientColorStops: canvasBg.colors,
@@ -186,16 +233,22 @@ export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,tex
     y={t.y}
     text={t.text}
     fontSize={t.fontSize}
+    fontStyle={t.fontStyle || "normal"}
     fontFamily={t.fontFamily}
     fill={t.color || "black"}
+    opacity={t.opacity ?? 1}
     draggable
     onDragEnd={(e) => {
       const newTexts = [...texts];
       newTexts[idx] = { ...newTexts[idx], x: e.target.x(), y: e.target.y() };
       setTexts(newTexts);
     }}
-    onClick={() => setSelectedShape(`text-${t.id}`)}
-    onTap={() => setSelectedShape(`text-${t.id}`)}
+    onClick={() => {
+  setSelectedShape(`text-${t.id}`);
+  setSelectedTextId(t.id); // ✅ parent knows which text is selected
+}}
+
+    onTap={() => {setSelectedShape(`text-${t.id}`);setSelectedTextId(t.id)}}
     onDblClick={(e) => {
       e.cancelBubble = true; // prevent stage deselect
       setEditingTextId(t.id);
@@ -254,5 +307,6 @@ export default function CanvasArea({ canvasSize, shapes, setShapes, canvasBg,tex
         </Layer>
       </Stage>
     </div>
-  );
-}
+);})
+
+export default CanvasArea

@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.collapsible::-webkit-scrollbar {
+  width: 4px;
+}
+
+.collapsible::-webkit-scrollbar-track {
+  background: #dee3ff;
+  border-radius: 8px;
+}
+
+.collapsible::-webkit-scrollbar-thumb {
+  background: #2c4734;
+  border-radius: 8px;
+}

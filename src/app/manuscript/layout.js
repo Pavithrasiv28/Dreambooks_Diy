@@ -5,6 +5,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import InterestsIcon from '@mui/icons-material/Interests';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import AddIcon from '@mui/icons-material/Add';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 // import { useState, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -13,6 +14,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 function ManuscriptLayout() {
     const [activeIndex, setActiveIndex] = useState(0);
+    const [collapsed, setCollapsed] = useState(true);
     const [diysidebar, setDiysidebar] = useState({
     button1: true,  // initial state
     button2: false,
@@ -58,9 +60,9 @@ function ManuscriptLayout() {
 
   return (
     <>
-    <div className="flex h-full w-full">
-    {diysidebar && (
-     <div className={`z-10 h-[100%] w-[7dvw] ${diysidebar.button2 ? '' : 'pointer-events-none opacity-30'} bg-[#E9E9E9] flex flex-col items-center justify-center rounded-tr-3xl rounded-br-3xl relative" style={{ boxShadow: "4px 0 6px -2px rgba(0,0,0,0.3)" }`}>
+    <div className="flex h-full w-full overflow-hidden">
+    
+     <div className={`z-2 h-[100%] w-[7dvw] ${diysidebar.button2 ? '' : 'pointer-events-none opacity-30'} bg-[#E9E9E9] flex flex-col items-center justify-center rounded-tr-3xl rounded-br-3xl relative" style={{ boxShadow: "4px 0 6px -2px rgba(0,0,0,0.3)" }`}>
        <div className="h-[90%] bg-rose-l00 w-full flex flex-col items-center justify-start py-[min(2rem,8%)]">
         {details.map((item, idx) =>{
           return(
@@ -78,12 +80,34 @@ function ManuscriptLayout() {
         })}
        </div>
       </div>
-    )}
-    {/* {!diysidebar.button2 && (
-    <div className="w-[7dvw]">
 
-    </div>
-    )} */}
+        {/*Collapsible  */}
+      {diysidebar.button2 && (
+      <div className={`h-full w-[25dvw] relative bg-white py-[min(1rem,3%)] box-border rounded-tl-4xl rounded-bl-4xl transform transition-transform duration-300 ${collapsed ? '-translate-x-[100%]' : 'translate-x-0'}`}>
+        <div className="text-center text-white font-bold flex justify-center items-center m-auto h-12 w-[90%] rounded-2xl bg-gradient-to-r from-blue-300 to-gray-400">TEMPLATES</div>
+        <div className="collapsible h-full w-full overflow-y-scroll mt-5">
+        <div className="h-fit w-full flex justify-center flex-col items-center over">
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 1</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 2</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 3</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 4</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 5</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 6</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 7</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 8</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 9</div>
+          <div className="h-60 w-[85%] bg-blue-200 text-black flex justify-center items-center my-2">TEMPLATE 10</div>
+        </div>
+        </div>
+        <div onClick={() => setCollapsed(!collapsed)} className={`z-[100] absolute top-1/2   ${collapsed ? '-right-4' : '-right-1'} -right-1 transform -translate-y-1/2 w-5 h-10 bg-gradient-to-b from-blue-400 to-purple-400 flex justify-center items-center rounded-full cursor-pointer shadow-lg transition-transform duration-300`}>
+          <KeyboardArrowRightIcon
+          className={`transition-transform duration-300 ${
+            collapsed ? "rotate-0" : "rotate-180"
+          }`}
+        />
+        </div>
+      </div>
+      )}
     
       <div className="panel w-[80dvw] h-full bg-whhite flex justify-center items-center flex-col">
           {diysidebar.button1 ? 
@@ -109,7 +133,7 @@ function ManuscriptLayout() {
           :''}
       </div>
 
-      <div className="choose w-[13dvw] h-full bg-yellow-2r00 flex justify-center items-center flex-col">
+      <div className="choose w-fit h-full p-[min(2rem,2%)] bg-yellow-2r00 flex justify-center items-center flex-col">
          <div onClick={() => handleUploadClick('button1')} className={`h-35 w-35 text-md ${diysidebar.button1 ? 'bg-blue-300 scale-120 text-sm border-3 border-dashed border-black' : 'bg-blue-300/30'} my-3 rounded-md text-black flex justify-center items-center text-center flex-col`}>
             <h4 className="text-black font-bold">UPLOAD MANUSCRIPT</h4>
             <img src="/inbox.png" alt="Upload-image" height={40} width={40} />

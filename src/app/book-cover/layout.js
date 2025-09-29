@@ -1,13 +1,13 @@
 "use client";
 import "../globals.css";
 import dynamic from "next/dynamic";
-import { useState, useEffect} from "react";
+import { useState, useEffect, useRef} from "react";
 // import { fabric } from "fabric";
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import TitleIcon from '@mui/icons-material/Title';
 import InterestsIcon from '@mui/icons-material/Interests';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
-import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
+import FormatColorTextIcon from '@mui/icons-material/FormatColorText';
 import AppsIcon from '@mui/icons-material/Apps';
 import AddIcon from '@mui/icons-material/Add';
 import AddReactionIcon from '@mui/icons-material/AddReaction';
@@ -20,6 +20,7 @@ import stickers from '../../../stickers.json'
 import fonts from '../../../fonts.json'
 import WebFont from "webfontloader";
 import CanvasArea from './page'
+import BackCanvas from '../components/back_canvas'
 
 
 export default function Booklayout() {
@@ -30,6 +31,16 @@ export default function Booklayout() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [canvasShapes, setCanvasShapes] = useState([])
 
+  // Front canvas
+  const frontCanvasRef = useRef(null);
+  const backCanvasRef = useRef(null);
+  // Active canvas
+  const [activeCanvas, setActiveCanvas] = useState("front"); // "front" or "back"\
+
+
+  // collapsible
+  const [collapsed, setCollapsed] = useState(true);
+
   // Background color
   const [canvasBg, setCanvasBg] = useState({
   type: "solid",
@@ -37,6 +48,7 @@ export default function Booklayout() {
   colors: [0, "#ff7e5f", 1, "#feb47b"],
   src: null
 });
+
   const [showPicker, setShowPicker] = useState(false);
   const [color, setColor] = useState("#ffffff");
   const [showGradPicker, setShowGradPicker] = useState(false);
@@ -46,10 +58,42 @@ const [customGradEnd, setCustomGradEnd] = useState("#0000ff");
 // Text
 const [texts, setTexts] = useState([]); // array of text objects
 const [selectedId, setSelectedId] = useState(null); // selected text
+const [selectedTextId, setSelectedTextId] = useState(null);
+
+const [showTextColorPicker, setShowTextColorPicker] = useState(false);
+const [textColor, setTextColor] = useState("#000000");
+
+// text style bold italic underline etc....
+const selectedText = texts.find(t => t.id === selectedTextId);
+
+// Dimensions
+  const [canvasSize, setCanvasSize] = useState({ width: 290, height: 370 });
 
 // Opacity
 const [opacity, setOpacity] = useState(1);
 
+// Palette vanish
+const colorPickerRef = useRef(null);
+
+// on mouse down palatte vanish
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      colorPickerRef.current &&
+      !colorPickerRef.current.contains(event.target)
+    ) {
+      setShowTextColorPicker(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
+// Fonts for text loader
 WebFont.load({
   google: {
     families: fonts.map(f => f.name) 
@@ -61,14 +105,67 @@ WebFont.load({
     state:false,
   });
 
+  const details = [
+    {description:'Upload Cover', icon: FileUploadIcon},
+    {description:'Text', icon: TitleIcon},
+    {description:'Background', icon: WallpaperIcon},
+    {description:'Shapes', icon: InterestsIcon},
+    {description:'Stickers', icon: AddReactionIcon},
+  ]
+
+   const shapes = [
+  { name: "Rectangle", type: "Rect" },
+  { name: "Circle", type: "Circle" },
+  { name: "Triangle", type: "Triangle" },
+  { name: "Ellipse", type: "Ellipse" },
+  { name: "Line", type: "Line" },
+  { name: "Polygon", type: "Polygon" },
+  { name: "Star", type: "Star" },
+  { name: "Arrow", type: "Arrow" },
+];
+
+//  Background colors
+  const basicColors = ["#ffffff", "#000000", "#ff4c4c", "#ff66cc", "#9966ff", "#6699ff"];
+  const gradientColors = [
+  { css: "linear-gradient(to right, #ff7e5f, #feb47b)", stops: [0, "#ff7e5f", 1, "#feb47b"] },
+  { css: "linear-gradient(to right, #6a11cb, #2575fc)", stops: [0, "#6a11cb", 1, "#2575fc"] },
+  { css: "linear-gradient(to right, #43cea2, #185a9d)", stops: [0, "#43cea2", 1, "#185a9d"] },
+  { css: "linear-gradient(to right, #ff512f, #dd2476)", stops: [0, "#ff512f", 1, "#dd2476"] },
+];
+
+
+  // Add shapes to canvas
   const addShapeToCanvas = (type) => {
-    // Add shape with default position and properties
-    setCanvasShapes([...canvasShapes, { type, x: 100, y: 100 }]);
-  };
+  const newShape = { type, x: 100, y: 100 };
 
-  // Dimensions
-  const [canvasSize, setCanvasSize] = useState({ width: 290, height: 370 });
+  if (activeCanvas === "front") {
+    setCanvasShapes((prev) => [...prev, newShape]);
+  } else {
+    setBackCanvasShapes((prev) => [...prev, newShape]);
+  }
+};
 
+// Download canvas
+const handleDownloadFront = () => {
+  if (!frontCanvasRef.current) return;
+  const uri = frontCanvasRef.current.toDataURL({ pixelRatio: 2 });
+  const link = document.createElement("a");
+  link.download = "front-canvas.png";
+  link.href = uri;
+  link.click();
+};
+
+const handleDownloadBack = () => {
+  if (!backCanvasRef.current) return;
+  const uri = backCanvasRef.current.toDataURL({ pixelRatio: 2 });
+  const link = document.createElement("a");
+  link.download = "back-canvas.png";
+  link.href = uri;
+  link.click();
+};
+
+
+  // edit or upload
   const HandleCanvasSheet = (idx) =>{
     if (idx === 0){
       setCanvas(false)
@@ -117,34 +214,6 @@ WebFont.load({
     reader.readAsDataURL(file);
 };
 
-  const details = [
-    {description:'Upload Cover', icon: FileUploadIcon},
-    {description:'Text', icon: TitleIcon},
-    {description:'Background', icon: WallpaperIcon},
-    {description:'Shapes', icon: InterestsIcon},
-    {description:'Stickers', icon: AddReactionIcon},
-  ]
-
-   const shapes = [
-  { name: "Rectangle", type: "Rect" },
-  { name: "Circle", type: "Circle" },
-  { name: "Triangle", type: "Triangle" },
-  { name: "Ellipse", type: "Ellipse" },
-  { name: "Line", type: "Line" },
-  { name: "Polygon", type: "Polygon" },
-  { name: "Star", type: "Star" },
-  { name: "Arrow", type: "Arrow" },
-];
-
-//  Background colors
-  const basicColors = ["#ffffff", "#000000", "#ff4c4c", "#ff66cc", "#9966ff", "#6699ff"];
-  const gradientColors = [
-  { css: "linear-gradient(to right, #ff7e5f, #feb47b)", stops: [0, "#ff7e5f", 1, "#feb47b"] },
-  { css: "linear-gradient(to right, #6a11cb, #2575fc)", stops: [0, "#6a11cb", 1, "#2575fc"] },
-  { css: "linear-gradient(to right, #43cea2, #185a9d)", stops: [0, "#43cea2", 1, "#185a9d"] },
-  { css: "linear-gradient(to right, #ff512f, #dd2476)", stops: [0, "#ff512f", 1, "#dd2476"] },
-];
-
  const handleAddSticker = (src) => {
   const newSticker = {
     type: "Sticker",
@@ -154,10 +223,137 @@ WebFont.load({
     width: 80,
     height: 80,
   };
-  setCanvasShapes([...canvasShapes, newSticker]);
+
+  if (activeCanvas === "front") {
+    setCanvasShapes((prev) => [...prev, newSticker]);
+  } else {
+    setBackCanvasShapes((prev) => [...prev, newSticker]);
+  }
 };
 
- const addText = (type) => {
+// ADD Text to canvas
+const addText = (type) => {
+  const defaultColor = "#000000";
+  const newText = {
+    id: Date.now(),
+    x: 50,
+    y: 50,
+    text: type === "heading" ? "Heading" : "Text",
+    fontFamily: "Roboto",
+    fontSize: type === "heading" ? 30 : 20,
+    color: defaultColor,
+    opacity: 1,
+    fontStyle: "normal"
+  };
+
+  if (activeCanvas === "front") {
+    setTexts((prev) => [...prev, newText]);
+    setSelectedTextId(newText.id);
+  } else {
+    setBackTexts((prev) => [...prev, newText]);
+    setBackSelectedTextId(newText.id);
+  }
+
+  setTextColor(defaultColor);
+
+  // ✅ tell BackCanvas what is selected
+  // You’ll need a setter prop for this
+  setSelectedShape(`text-${newText.id}`);
+};
+
+
+const setActiveBg = (bg) => {
+  if (activeCanvas === "front") {
+    setCanvasBg(bg);
+  } else {
+    setBackCanvasBg(bg);
+  }
+};
+
+// bg upload
+const handleBgUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+  if (!validTypes.includes(file.type)) {
+    alert("Only JPG and PNG files are allowed!");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("File size must be below 5MB!");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setActiveBg({ type: "image", src: reader.result });
+  };
+  reader.readAsDataURL(file);
+};
+
+// -------------------- BACK COVER STATES --------------------
+
+// Back canvas shapes
+const [backCanvasShapes, setBackCanvasShapes] = useState([]);
+
+// Back canvas background
+const [backCanvasBg, setBackCanvasBg] = useState({
+  type: "solid",
+  color: "#ffffff",
+  colors: [0, "#ff7e5f", 1, "#feb47b"],
+  src: null
+});
+
+// Texts on back canvas
+const [backTexts, setBackTexts] = useState([]);
+
+// Selected text ID for back canvas
+const [backSelectedTextId, setBackSelectedTextId] = useState(null);
+
+// Text color picker for back canvas
+const [backTextColor, setBackTextColor] = useState("#000000");
+
+// Text opacity for back canvas (optional separate control)
+const [backOpacity, setBackOpacity] = useState(1);
+
+// Text color picker visibility
+const [showBackTextColorPicker, setShowBackTextColorPicker] = useState(false);
+
+// Ref for color picker (back canvas)
+const backColorPickerRef = useRef(null);
+
+
+// -------------------- BACK COVER FUNCTIONS --------------------
+
+// Handle click outside back text color picker
+useEffect(() => {
+  const handleClickOutsideBack = (event) => {
+    if (
+      backColorPickerRef.current &&
+      !backColorPickerRef.current.contains(event.target)
+    ) {
+      setShowBackTextColorPicker(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutsideBack);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutsideBack);
+  };
+}, []);
+
+// Add shape to back canvas
+const addShapeToBackCanvas = (type) => {
+  setBackCanvasShapes([...backCanvasShapes, { type, x: 100, y: 100 }]);
+};
+
+// Add text to back canvas
+const addBackText = (type) => {
+  const defaultColor = "#000000"; // always start new text as black
+
   const newText = {
     id: Date.now(),
     x: 50,
@@ -165,12 +361,58 @@ WebFont.load({
     text: type === "heading" ? "Heading" : "Subtitle",
     fontFamily: "Roboto",
     fontSize: type === "heading" ? 30 : 20,
-    fill: "#000000"
+    color: defaultColor,
+    opacity: 1,
+    fontStyle: "normal"
   };
-  setTexts([...texts, newText]);
-  setSelectedId(newText.id);
+
+  setBackTexts([...backTexts, newText]);
+  setBackSelectedTextId(newText.id); // select immediately
+  setBackTextColor(defaultColor); // reset color picker
 };
-  
+
+// Upload background for back canvas
+const handleBackBgUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validate type
+  const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+  if (!validTypes.includes(file.type)) {
+    alert("Only JPG and PNG files are allowed!");
+    return;
+  }
+
+  // Validate size 5MB
+  if (file.size > 5 * 1024 * 1024) {
+    alert("File size must be below 5MB!");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setBackCanvasBg({
+      type: "image",
+      src: reader.result
+    });
+  };
+  reader.readAsDataURL(file);
+};
+
+// Add sticker to back canvas
+const handleAddStickerBack = (src) => {
+  const newSticker = {
+    type: "Sticker",
+    src,
+    x: 50,
+    y: 50,
+    width: 80,
+    height: 80,
+  };
+  setBackCanvasShapes([...backCanvasShapes, newSticker]);
+};
+
+
   return (
     <>
     <div className="h-full flex bg-black">
@@ -199,7 +441,7 @@ WebFont.load({
 
       {/* Collapsible */}
       {sidebar.state ?
-      <div className="z-0 collapsible h-full w-[25dvw] relative bg-white p-[min(1rem,3%)] overflow-y-scroll box-border rounded-tl-4xl rounded-bl-4xl">
+      <div className={`z-0 collapsible h-full w-[25dvw] relative bg-white p-[min(1rem,3%)] overflow-y-scroll box-border rounded-tl-4xl rounded-bl-4xl overflow-x-hidden`}>
          <div className="text-center text-white font-bold flex justify-center items-center h-12 w-full rounded-2xl bg-gradient-to-r from-blue-300 to-gray-400">{sidebar.icon === 1 ? 'TEXT' : sidebar.icon === 2 ? 'BACKGROUND' : sidebar.icon === 3 ? 'SHAPES' : 'STICKERS' }</div>
           
           {sidebar.icon === 1 ? (
@@ -207,22 +449,22 @@ WebFont.load({
           <div className=" h-fit w-full box-border p-[min(2rem,5%)] mt-6 text-black flex-wrap">
             <div className="btn_group h-22 w-full flex flex-col justify-between">
                <button onClick={() => addText("heading")} className="w-full h-10 bg-gray-50 border-1 font-bold text-xl rounded-md">Add a Heading</button>
-               <button onClick={() => addText("subtitle")} className="w-full h-10 bg-gray-50 border-1 font-medium rounded-md">Add a Subtitle</button>
+               <button onClick={() => addText("text")} className="w-full h-10 bg-gray-50 border-1 font-medium rounded-md">Add Text</button>
             </div>
             <div className="fonts w-full h-fit mt-4">
               <h3 className="font-bold text-center">FONTS</h3>
               <div className="font-display">
                 {fonts.map((font, idx) => (
-                <button key={idx} 
-                style={{ fontFamily: font.name }} 
-                className="h-10 w-full bg-gray-200 my-2"
-                onClick={() => {
-                if (selectedId) {
-                setTexts(texts.map(t => t.id === selectedId ? { ...t, fontFamily: font.name } : t));
-                }}}
-                >
-                   {font.name}
-                  </button>
+                <button key={idx} style={{ fontFamily: font.name }} className="h-10 w-full bg-gray-200 my-2" onClick={() => {
+                 if (activeCanvas === "front" && selectedTextId) {
+                  setTexts(prev =>
+                  prev.map(t =>
+                  t.id === selectedTextId ? { ...t, fontFamily: font.name } : t));
+                } else if (activeCanvas === "back" && backSelectedTextId) {
+                  setBackTexts(prev =>
+                  prev.map(t =>
+                  t.id === backSelectedTextId ? { ...t, fontFamily: font.name } : t));}}}>
+                {font.name}</button>
                 ))}
               </div>
             </div>
@@ -240,7 +482,7 @@ WebFont.load({
                  key={idx}
                 className="h-11 w-11 rounded-full border-1 m-1"
                 style={{ backgroundColor: color }}
-                onClick={() => setCanvasBg({ type: "solid", color })}/>
+                onClick={() => setActiveBg({ type: "solid", color })}/>
                 ))}
                 <button 
                 onClick={() => setShowPicker(!showPicker)}
@@ -251,8 +493,7 @@ WebFont.load({
               <SketchPicker color={color}
                onChange={(updatedColor) => {
                setColor(updatedColor.hex);
-               setCanvasBg({ type: "solid", color: updatedColor.hex });
-               }}/>
+               setActiveBg({ type: "solid", color: updatedColor.hex });}}/>
                </div>)} 
               </div>
 
@@ -264,7 +505,7 @@ WebFont.load({
                  key={idx}
                 className="h-11 w-11 rounded-full border-1 m-1"
                 style={{ background: gradient.css}}
-                onClick={() => setCanvasBg({ type: "gradient", colors: gradient.stops })}/>
+                onClick={() => setActiveBg({ type: "gradient", colors: gradient.stops })}/>
                 ))}
 
                 <button
@@ -285,15 +526,20 @@ WebFont.load({
                    <button
                    className="h-10 px-4 mt-4 bg-blue-500 text-white rounded"
                    onClick={() => {
-                   setCanvasBg({ 
-                   type: "gradient", 
-                   colors: [0, customGradStart, 1, customGradEnd]
-                   });
+                    setActiveBg({ type: "gradient", colors: [0, customGradStart, 1, customGradEnd] });
                    setShowGradPicker(false);}}>Apply Gradient
                   </button>
                   </div>
                   </div>
                   )}
+              </div>
+
+               <div className="h-fit w-full mt-4">
+                <h5 className="font-bold">Upload Background</h5>
+                <label className="h-11 w-11 border-2 rounded-full flex justify-center items-center m-1 cursor-pointer">
+                  <FileUploadIcon />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
+                </label>
               </div>
 
               <div className="h-fit w-full mt-4">
@@ -304,7 +550,7 @@ WebFont.load({
                   key={img.id}
                   src={img.src}
                   alt={img.name} className="h-30 w-20 my-2"
-                  onClick={() => setCanvasBg({ type: "image", src: img.src })} 
+                  onClick={() => setActiveBg({ type: "image", src: img.src })}
                   />
                 ))}
                 </div>
@@ -351,38 +597,132 @@ WebFont.load({
               ))}
             </div>
          )}
+
+         {/* <div onClick={() => setCollapsed(!collapsed)} className={`z-50 fixed top-1/2   
+          ${collapsed ? 'fixed h-[30px] w-[20px]' : ''} left-89 transform -translate-x-1/2 w-5 h-10 bg-gradient-to-b from-blue-400 to-purple-400 flex justify-center items-center rounded-full cursor-pointer shadow-lg transition-transform duration-300`}>
+          <KeyboardArrowRightIcon
+          className={`transition-transform duration-300 ${
+            collapsed ? "rotate-0" : "rotate-180"
+          }`}
+        />
+        </div> */}
+         {/* <div onClick={() => setCollapsed(!collapsed)} className={`
+      fixed top-1/2 left-81 transform -translate-y-1/2
+      w-5 h-10 bg-gradient-to-b from-blue-400 to-purple-400
+      flex justify-center items-center rounded-full cursor-pointer shadow-lg
+      z-[100] transition-transform duration-300
+      ${collapsed ? 'translate-x-full' : 'translate-x-0'}
+    `}>
+          <KeyboardArrowRightIcon
+          className={`transition-transform duration-300 ${
+            collapsed ? "rotate-0" : "rotate-180"
+          }`}
+        />
+        </div> */}
       </div>
        : null}
-
-
 
        
        {/* Page */}
       <div className="w-[80dvw] h-full">
         {canvas ?(
           <>
-        <div className="w-[90%] h-12 bg-white m-auto mt-3 rounded-4xl flex items-center px-3 justify-between">
+          {/* Text Edit */}
+        {(activeCanvas === "front" ? selectedTextId && texts.length > 0 : backSelectedTextId && backTexts.length > 0) && (                                         
+        <div className="text-edit w-[90%] h-12 bg-white m-auto mt-3 rounded-4xl flex items-center px-3 justify-between">
         <div className="h-fit w-70 border-black flex justify-between px-2">
-          <button className="text-2xl font-bold text-black border-1 w-8 h-8">B</button>
-          <button className="text-2xl font-bold text-black border-1 w-8 h-8 italic">I</button>
-          <button className="text-2xl font-bold text-black border-1 w-8 h-8 underline">U</button>
-          <button className="text-2xl text-black border-1 w-8 h-8 line-through">S</button>
-          <button className="text-2xl text-black border-1 w-9 h-9 line-through"><FormatColorFillIcon/></button>
+          {/* Bold Text */}
+          <button className={`text-xl font-bold text-black w-8 h-8 bg-gray-300 ${selectedText?.fontStyle === "bold" ? "scale-125 bg-yellow-400" : ""}`} 
+          onClick={() => { 
+             if (activeCanvas === "front" && selectedTextId) {
+               setTexts(prev => prev.map(t => t.id === selectedTextId ? { ...t, fontStyle: t.fontStyle === "bold" ? "normal" : "bold" } : t));
+              } else if (activeCanvas === "back" && backSelectedTextId) {
+                setBackTexts(prev => prev.map(t => t.id === backSelectedTextId ? { ...t, fontStyle: t.fontStyle === "bold" ? "normal" : "bold" } : t));}}}>
+          B</button>
+          {/* Italic Text */}
+          <button 
+          className={`text-xl font-bold italic text-black w-8 h-8 bg-gray-300 transition-transform duration-200 ${selectedText?.fontStyle === "italic" ? "scale-125 bg-yellow-400" : ""}`}
+           onClick={() => {
+              if (activeCanvas === "front" && selectedTextId) {
+                setTexts(prev => prev.map(t => t.id === selectedTextId ? { ...t, fontStyle: t.fontStyle === "italic" ? "normal" : "italic" } : t));
+              } else if (activeCanvas === "back" && backSelectedTextId) {
+               setBackTexts(prev => prev.map(t => t.id === backSelectedTextId ? { ...t, fontStyle: t.fontStyle === "italic" ? "normal" : "italic" } : t));}}}>
+             I</button>
+          {/* Underline */}
+          <button className={`text-xl font-bold underline text-black w-8 h-8 bg-gray-300 transition-transform duration-200 ${selectedText?.fontStyle === "underline" ? "scale-125 bg-yellow-400" : ""}`}
+           onClick={() =>{ if (activeCanvas === "front" && selectedTextId) {
+            setTexts(prev => prev.map(t => t.id === selectedTextId ? { ...t, fontStyle: t.fontStyle === "underline" ? "underline" : "bold" } : t));
+          } else if (activeCanvas === "back" && backSelectedTextId) {
+            setBackTexts(prev => prev.map(t => t.id === backSelectedTextId ? { ...t, fontStyle: t.fontStyle === "underline" ? "normal" : "underline" } : t));}}}>
+          U</button>
+          {/* <button className="text-xl text-black w-8 h-8 line-through bg-gray-300">S</button> */}
+          <button onClick={() => setShowTextColorPicker(!showTextColorPicker)} className="text-xl text-black w-9 h-8 line-through bg-gray-300"><FormatColorTextIcon sx={{fontSize:20}}/></button>
+          {showTextColorPicker && selectedTextId && (
+         <div ref={colorPickerRef} className="absolute z-50 mt-2">
+         <SketchPicker color={activeCanvas === "front" ? textColor : backTextColor} onChange={(color) => {
+             if (activeCanvas === "front") {
+              setTextColor(color.hex);
+              setTexts(prev =>
+              prev.map(t =>t.id === selectedTextId ? { ...t, color: color.hex } : t));
+              } else {
+              setBackTextColor(color.hex);
+              setBackTexts(prev =>
+              prev.map(t =>
+              t.id === backSelectedTextId ? { ...t, color: color.hex } : t));}}}/>
+
+          </div>)}
         </div>
-        <div className="slider">
-          <label className="mb-2 font-bold text-black">Transparency: {Math.round(opacity * 100)}%</label>
-          <input type="range" min={0} max={1} step={0.01} style={{backgroundColor:'black'}} value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-full"/>
+        {/* Transparency Slider */}
+        <div className="slider w-80 mx-auto">
+          <label className="mb-2 font-bold text-black"> Transparency: {Math.round((selectedText?.opacity ?? 1) * 100)}%</label>
+          <input type="range" min={0} max={1} step={0.01} style={{ backgroundColor: "black" }}
+           value={
+             activeCanvas === "front" ? texts.find(t => t.id === selectedTextId)?.opacity ?? 1 : backTexts.find(t => t.id === backSelectedTextId)?.opacity ?? 1}
+             onChange={(e) => {
+             const value = parseFloat(e.target.value);
+             if (activeCanvas === "front" && selectedTextId) {
+               setTexts(prev => prev.map(t => t.id === selectedTextId ? { ...t, opacity: value } : t));
+             } else if (activeCanvas === "back" && backSelectedTextId) {
+               setBackTexts(prev => prev.map(t => t.id === backSelectedTextId ? { ...t, opacity: value } : t));}}}className="w-full"/>
         </div>
         </div>
+        )}
+        
+        {activeCanvas === "front" && (
         <CanvasArea 
+        ref={frontCanvasRef}
         canvasSize={canvasSize} 
         shapes={canvasShapes} 
-        setShapes={setCanvasShapes} 
+        setShapes={setCanvasShapes}
         canvasBg={canvasBg} 
         handleAddSticker = {handleAddSticker}
         texts={texts}
+        textColor={textColor}
         setTexts={setTexts}
+        selectedId={selectedId}
+        setSelectedTextId={setSelectedTextId}
         />
+        )}
+
+        {activeCanvas === "back" && (
+        <BackCanvas
+        ref={backCanvasRef}
+        canvasSize={canvasSize}                  
+        shapes={backCanvasShapes}               
+        setShapes={setBackCanvasShapes}         
+        canvasBg={backCanvasBg}                 
+        texts={backTexts}                       
+        setTexts={setBackTexts}                 
+        selectedId={backSelectedTextId}         
+        setSelectedTextId={setBackSelectedTextId} 
+        textColor={backTextColor}               
+       />
+       )}
+
+        <div className="w-60 m-auto flex justify-between">
+          <button className={`text-white font-bold h-fit w-fit border-1 rounded-full py-1 px-3 ${activeCanvas === "front" ? "bg-blue-500" : "bg-gray-500" }`} onClick={() => setActiveCanvas("front")}>Frontcover</button>
+          <button className={`text-white font-bold h-fit w-fit border-1 rounded-full py-1 px-3 ${activeCanvas === "back" ? "bg-blue-500" : "bg-gray-500"}`} onClick={() => setActiveCanvas("back")}>Backcover</button>
+        </div>
         </>
         )
 
@@ -420,14 +760,14 @@ WebFont.load({
       </div>
 
       {/* Dimensions */}
-        <div className="w-[13dvw] flex justify-center items-center bg-black">
+      <div className="w-[13dvw] flex justify-center items-center bg-black flex-col">
     <div className="h-fit w-full flex flex-col justify-between items-center">
       <h3 className="text-white mb-2">Dimensions</h3>
       {[
         { label: '5" x 8"', width: 200, height: 300 },
         { label: '5.5" x 8.5"', width: 220, height: 310 },
         { label: '7.25" x 9.25"', width: 290, height: 370 },
-        { label: '8.25" x 11"', width: 330, height: 450 },
+        { label: '8.25" x 11"', width: 300, height: 420 },
       ].map((book, idx) => {
         const isActive =
           canvasSize.width === book.width && canvasSize.height === book.height;
@@ -445,6 +785,11 @@ WebFont.load({
         );
       })}
     </div>
+   <button onClick={() => {if (activeCanvas === "front"){handleDownloadFront();}else{handleDownloadBack();}}} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+  {activeCanvas === "front" ? "Download Front Cover" : "Download Back Cover"}
+</button>
+
+
   </div>
 
      </div>
@@ -453,3 +798,4 @@ WebFont.load({
 }
 
 {/* <div className="h-200 w-25 bg-gradient-to-b from-blue-400 to-purple-400 flex flex-col items-center justify-center"></div> */}
+                
