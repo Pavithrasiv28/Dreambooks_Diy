@@ -1,5 +1,5 @@
 // app/manuscript/page.js
-"use client";
+// "use client";
 export default function ManuscriptPage() {
   return <div>My manuscript content</div>;
 }
