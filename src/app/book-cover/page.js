@@ -10,6 +10,7 @@ function Sticker({ shape, ...commonProps }) {
   return <KonvaImage {...commonProps} image={image} width={shape.width || 80} height={shape.height || 80} />;
 }
 
+
 const CanvasArea = forwardRef(({ canvasSize, shapes, setShapes, canvasBg, texts, setTexts, selectedId, setSelectedTextId, textColor }, ref) => {
   const [editingTextId, setEditingTextId] = useState(null);
   const [selectedShape, setSelectedShape] = useState(null);
@@ -309,5 +310,7 @@ useEffect(() => {
       </Stage>
     </div>
 );})
+
+// CanvasArea.displayName = "CanvasArea";
 
 export default CanvasArea
