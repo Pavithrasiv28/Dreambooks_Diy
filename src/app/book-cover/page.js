@@ -21,6 +21,11 @@ const CanvasArea = forwardRef(({ canvasSize, shapes, setShapes, canvasBg, texts,
   const stageRef = useRef(null)
   const wrapperRef = useRef();
 
+  const [isBrowser, setIsBrowser] = useState(false);
+   useEffect(() => { setIsBrowser(true); }, []);
+
+   if (!isBrowser) return null;
+
  useEffect(() => {
   if (ref) {
     ref.current = stageRef.current; 
