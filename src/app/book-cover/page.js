@@ -311,6 +311,6 @@ useEffect(() => {
     </div>
 );})
 
-// CanvasArea.displayName = "CanvasArea";
+CanvasArea.displayName = "CanvasArea";
 
 export default CanvasArea
