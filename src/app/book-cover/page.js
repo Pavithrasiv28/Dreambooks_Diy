@@ -39,24 +39,24 @@ const CanvasArea = forwardRef(
     }, [ref, stageRef]);
 
     // ✅ Mouse down transformer vanish
-    useEffect(() => {
-      const handleClickOutside = (e) => {
-        if (!stageRef.current) return;
+    // useEffect(() => {
+    //   const handleClickOutside = (e) => {
+    //     if (!stageRef.current) return;
 
-        const isClickOnStage = stageRef.current.container().contains(e.target);
-        const isClickOnButtons = wrapperRef.current?.contains(e.target);
+    //     const isClickOnStage = stageRef.current.container().contains(e.target);
+    //     const isClickOnButtons = wrapperRef.current?.contains(e.target);
 
-        if (!isClickOnStage && !isClickOnButtons) {
-          setSelectedShape(null);
-          setSelectedTextId(null);
-        }
-      };
+    //     if (!isClickOnStage && !isClickOnButtons) {
+    //       setSelectedShape(null);
+    //       setSelectedTextId(null);
+    //     }
+    //   };
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [setSelectedTextId]);
+    //   document.addEventListener("mousedown", handleClickOutside);
+    //   return () => {
+    //     document.removeEventListener("mousedown", handleClickOutside);
+    //   };
+    // }, [setSelectedTextId]);
 
     // Update transformer
     useEffect(() => {
@@ -83,6 +83,15 @@ const CanvasArea = forwardRef(
         );
       }
     }, [textColor, selectedId, setTexts]);
+
+//     useEffect(() => {
+//   if (canvasBg.type === "image") {
+//     import("use-image").then((mod) => {
+//       const [image] = mod.default(canvasBg.src);
+//       setBgImage(image);
+//     });
+//   }
+// }, [canvasBg]);
 
 
     if (!isBrowser) return null;
@@ -140,7 +149,7 @@ const CanvasArea = forwardRef(
     };
 
     return (
-      <div className="relative w-full h-[82%] py-5 flex justify-center items-center">
+      <div ref={wrapperRef} className="relative w-full h-[82%] py-5 flex justify-center items-center">
         {selectedShape !== null && (
           <div ref={wrapperRef} className="absolute top-2 right-2 flex gap-2 z-10">
             <button
@@ -163,16 +172,12 @@ const CanvasArea = forwardRef(
           height={canvasSize.height}
           ref={stageRef}
           className="bg-white border"
-          onMouseDown={(e) => {
-            if (e.target === e.target.getStage()) {
-              setSelectedShape(null);
-              setSelectedTextId(null);
-            }
-          }}
+          onMouseDown={() => {}}
         >
           <Layer ref={layerRef}>
             {/* Background */}
             <Rect
+            id="background-rect" 
               x={0}
               y={0}
               width={canvasSize.width}
@@ -195,6 +200,10 @@ const CanvasArea = forwardRef(
                     fillPatternRepeat: "no-repeat",
                   }
                 : {})}
+                   onMouseDown={() => {
+    setSelectedShape(null);
+    setSelectedTextId(null);
+  }}
             />
 
             {/* Render shapes */}
