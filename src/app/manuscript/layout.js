@@ -1,5 +1,6 @@
 "use client";
 import { useState,useRef } from "react";
+import Image from "next/image";
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import TitleIcon from '@mui/icons-material/Title';
 import InterestsIcon from '@mui/icons-material/Interests';
@@ -66,8 +67,8 @@ function ManuscriptLayout() {
        <div className="h-[90%] bg-rose-l00 w-full flex flex-col items-center justify-start py-[min(2rem,8%)]">
         {details.map((item, idx) =>{
           return(
-          <div className="my-3">
-          <button key={idx} 
+          <div key={idx} className="my-3">
+          <button 
           className={`h-15 w-15 rounded-2xl p-2 bg-gradient-to-b from-blue-400 to-purple-400 flex flex-col items-center justify-evenly
              ${activeIndex === idx ? "border-4 border-b-slate-900 border-t-slate-900 scale" : ""}`}
           onClick={() =>{ setActiveIndex(idx);}}
@@ -136,11 +137,11 @@ function ManuscriptLayout() {
       <div className="choose w-fit h-full p-[min(2rem,2%)] bg-yellow-2r00 flex justify-center items-center flex-col">
          <div onClick={() => handleUploadClick('button1')} className={`h-35 w-35 text-md ${diysidebar.button1 ? 'bg-blue-300 scale-120 text-sm border-3 border-dashed border-black' : 'bg-blue-300/30'} my-3 rounded-md text-black flex justify-center items-center text-center flex-col`}>
             <h4 className="text-black font-bold">UPLOAD MANUSCRIPT</h4>
-            <img src="/inbox.png" alt="Upload-image" height={40} width={40} />
+            <Image src="/inbox.png" alt="Upload-image" height={40} width={40} />
          </div>
          <div onClick={() => handleUploadClick('button2')} className={`h-35 w-35 text-md ${diysidebar.button2 ? 'bg-blue-300 scale-120 text-sm border-3 border-dashed border-black' : 'bg-blue-300/20'} my-3 rounded-md text-black flex justify-center items-center text-center flex-col`}>
             <h4 className="text-black font-bold">CREATE</h4>
-            <img src="/diy.png" alt="Upload-image" height={40} width={40} />
+            <Image src="/diy.png" alt="Upload-image" height={40} width={40} />
          </div>
       </div>
     </div>
