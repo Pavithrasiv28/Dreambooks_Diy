@@ -24,7 +24,7 @@ const CanvasArea = forwardRef(({ canvasSize, shapes, setShapes, canvasBg, texts,
   const [isBrowser, setIsBrowser] = useState(false);
    useEffect(() => { setIsBrowser(true); }, []);
 
-   if (!isBrowser) return null;
+   
 
  useEffect(() => {
   if (ref) {
@@ -52,6 +52,9 @@ useEffect(() => {
     document.removeEventListener("mousedown", handleClickOutside);
   };
 }, []);
+
+
+if (!isBrowser) return null;
 
 
   // Background image
