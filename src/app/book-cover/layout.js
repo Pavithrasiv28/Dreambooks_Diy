@@ -16,6 +16,7 @@ import { Stage, Layer, Rect, Circle, Line, Ellipse, RegularPolygon, Star, Arrow 
 import { SketchPicker, ChromePicker } from "react-color";
 import ghost from "../../../public/background/ghost.jpg"
 import bgimages from '../../.././Image.json'
+import Image from 'next/image';
 import stickers from '../../../stickers.json'
 import fonts from '../../../fonts.json'
 import WebFont from "webfontloader";
@@ -548,7 +549,7 @@ const handleAddStickerBack = (src) => {
                 <h5 className="font-bold">Background Images</h5>
                 <div className=" w-full h-full p-[min(1rem,5%)] flex flex-wrap justify-between">
                 {bgimages.map((img) => (
-                  <img 
+                  <Image 
                   key={img.id}
                   src={img.src}
                   alt={img.name} className="h-30 w-20 my-2"
@@ -590,7 +591,7 @@ const handleAddStickerBack = (src) => {
                <h5 className="font-bold underline">{category.category}</h5>
                <div className="flex justify-between items-center flex-wrap">
                 {category.stickers.map((sticker) => (
-                 <img key={sticker.id} src={sticker.src} alt={`sticker-${sticker.id}`}
+                 <Image key={sticker.id} src={sticker.src} alt={`sticker-${sticker.id}`}
                  className="w-16 h-16 cursor-pointer hover:scale-110 transition-transform"
                  onClick={() => handleAddSticker(sticker.src)} />
                   ))}
@@ -735,12 +736,12 @@ const handleAddStickerBack = (src) => {
             {/* front cover */}
              <div className="relative w-60 h-85 bg-white text-[#5e5e5e] text-[12px] text-center flex justify-center items-center">
                {frontCover ? (
-                <img src={frontCover} alt="Front Cover" className="absolute top-0 left-0 w-full h-full object-cover" />) : (
+                <Image src={frontCover} alt="Front Cover" className="absolute top-0 left-0 w-full h-full object-cover" />) : (
                 <>Front Cover <br /> Supported: JPG, PNG (Max 5MB)</>)}
               </div>
              {/* Back cover */}
              <div className="relative w-60 h-85 bg-white text-[#5e5e5e] text-[12px] text-center flex justify-center items-center">
-               {backCover ? (<img src={backCover} alt="Back Cover" className="absolute top-0 left-0 w-full h-full object-cover" />) : (
+               {backCover ? (<Image src={backCover} alt="Back Cover" className="absolute top-0 left-0 w-full h-full object-cover" />) : (
                 <>Back Cover <br /> Supported: JPG, PNG (Max 5MB)</>)}
              </div>
            </div>
