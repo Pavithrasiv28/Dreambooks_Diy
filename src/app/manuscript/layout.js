@@ -1,5 +1,5 @@
 "use client";
-import { useState,useRef } from "react";
+import { useState,useRef, useEffect} from "react";
 import Image from "next/image";
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import TitleIcon from '@mui/icons-material/Title';
@@ -16,6 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 function ManuscriptLayout() {
     const [activeIndex, setActiveIndex] = useState(0);
     const [collapsed, setCollapsed] = useState(true);
+    const [isBrowser, setIsBrowser] = useState(false);
     const [diysidebar, setDiysidebar] = useState({
     button1: true,  // initial state
     button2: false,
@@ -52,12 +53,17 @@ function ManuscriptLayout() {
         }
     }
 
-    const handlePreview = () => {
-    if (file) {
-      const fileURL = URL.createObjectURL(file); // create a temporary URL
-      window.open(fileURL, "_blank"); // open in a new tab
+    useEffect(() => {
+    setIsBrowser(true); // only true on client
+  }, []);
+
+  const handlePreview = () => {
+    if (isBrowser && file) {
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL, "_blank"); // safe now
     }
   };
+
 
   return (
     <>
