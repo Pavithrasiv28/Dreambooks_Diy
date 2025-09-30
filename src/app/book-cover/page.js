@@ -209,7 +209,7 @@ const CanvasArea = forwardRef(
             {/* Render shapes */}
             {shapes.map((shape, idx) => {
               const commonProps = {
-                key: idx,
+                // key: idx,
                 id: `shape-${idx}`,
                 x: shape.x || 50,
                 y: shape.y || 50,
@@ -221,21 +221,22 @@ const CanvasArea = forwardRef(
 
               switch (shape.type) {
                 case "Rect":
-                  return <Rect {...commonProps} width={shape.width || 100} height={shape.height || 60} fill={shape.color || "black"} />;
+                  return <Rect key={idx} {...commonProps} width={shape.width || 100} height={shape.height || 60} fill={shape.color || "black"} />;
                 case "Circle":
-                  return <Circle {...commonProps} radius={shape.radius || 50} fill={shape.color || "black"} />;
+                  return <Circle key={idx} {...commonProps} radius={shape.radius || 50} fill={shape.color || "black"} />;
                 case "Triangle":
-                  return <Line {...commonProps} points={[0, 50, 50, 50, 25, 0]} closed fill={shape.color || "black"} />;
+                  return <Line key={idx} {...commonProps} points={[0, 50, 50, 50, 25, 0]} closed fill={shape.color || "black"} />;
                 case "Ellipse":
-                  return <Ellipse {...commonProps} radiusX={shape.radiusX || 50} radiusY={shape.radiusY || 30} fill={shape.color || "black"} />;
+                  return <Ellipse key={idx} {...commonProps} radiusX={shape.radiusX || 50} radiusY={shape.radiusY || 30} fill={shape.color || "black"} />;
                 case "Line":
-                  return <Line {...commonProps} points={shape.points || [0, 0, 100, 0]} stroke={shape.color || "black"} strokeWidth={3} />;
+                  return <Line key={idx} {...commonProps} points={shape.points || [0, 0, 100, 0]} stroke={shape.color || "black"} strokeWidth={3} />;
                 case "Polygon":
-                  return <Line {...commonProps} points={shape.points || [0, 50, 25, 0, 50, 50, 25, 25]} closed fill={shape.color || "black"} />;
+                  return <Line key={idx} {...commonProps} points={shape.points || [0, 50, 25, 0, 50, 50, 25, 25]} closed fill={shape.color || "black"} />;
                 case "Star":
-                  return <Star {...commonProps} numPoints={5} innerRadius={shape.innerRadius || 10} outerRadius={shape.outerRadius || 25} fill={shape.color || "black"} />;
+                  return <Star key={idx} {...commonProps} numPoints={5} innerRadius={shape.innerRadius || 10} outerRadius={shape.outerRadius || 25} fill={shape.color || "black"} />;
                 case "Arrow":
                   return <Arrow
+                     key={idx}
                     {...commonProps}
                     points={shape.points || [0, 0, 100, 0]}
                     pointerLength={10}
@@ -244,7 +245,7 @@ const CanvasArea = forwardRef(
                     stroke={shape.color || "black"}
                   />;
                 case "Sticker":
-                  return <Sticker {...commonProps} shape={shape} />;
+                  return <Sticker key={idx} {...commonProps} shape={shape} />;
                 default:
                   return null;
               }
