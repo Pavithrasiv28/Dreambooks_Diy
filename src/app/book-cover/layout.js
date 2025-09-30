@@ -298,6 +298,8 @@ const handleBgUpload = (e) => {
 // Back canvas shapes
 const [backCanvasShapes, setBackCanvasShapes] = useState([]);
 
+const [selectedShape, setSelectedShape] = useState(null);
+
 // Back canvas background
 const [backCanvasBg, setBackCanvasBg] = useState({
   type: "solid",
@@ -421,8 +423,8 @@ const handleAddStickerBack = (src) => {
        <div className="h-[90%] bg-rose-l00 w-full flex flex-col items-center justify-between py-[min(2rem,8%)]">
         {details.map((item, idx) =>{
           return(
-          <>
-          <button key={idx} 
+          <div key={idx} className=" w-fit h-fit flex flex-col items-center">
+          <button
           className={`h-15 w-15 rounded-2xl p-2 bg-gradient-to-b from-blue-400 to-purple-400 flex flex-col items-center justify-evenly
              ${activeIndex === idx ? "border-4 border-b-slate-900 border-t-slate-900 scale" : ""}`}
           onClick={() =>{ setActiveIndex(idx);HandleCanvasSheet(idx);}}
@@ -430,7 +432,7 @@ const handleAddStickerBack = (src) => {
            <item.icon/>
           </button>
            <p className="text-[#5B5B5B] text-center text-[12px] font-bold">{item.description}</p>
-           </>
+           </div>
          );
         })}
          {/* <div className="absolute right-[-12px] top-1/2 transform -translate-y-1/2 bg-gradient-to-b from-blue-400 to-purple-400 rounded-4xl">
@@ -709,7 +711,8 @@ const handleAddStickerBack = (src) => {
         ref={backCanvasRef}
         canvasSize={canvasSize}                  
         shapes={backCanvasShapes}               
-        setShapes={setBackCanvasShapes}         
+        setShapes={setBackCanvasShapes}
+        selectedShape={selectedShape}        
         canvasBg={backCanvasBg}                 
         texts={backTexts}                       
         setTexts={setBackTexts}                 

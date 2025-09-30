@@ -18,6 +18,7 @@ const CanvasArea = forwardRef(({ canvasSize, shapes, setShapes, canvasBg, texts,
   const layerRef = useRef();
   const internalRef = useRef(null);
   const stageRef = useRef(null)
+  const wrapperRef = useRef();
 
  useEffect(() => {
   if (ref) {
@@ -30,22 +31,22 @@ useEffect(() => {
   const handleClickOutside = (e) => {
     if (!stageRef.current) return;
 
-    // Check if the click is outside the stage container
-    if (!stageRef.current.container().contains(e.target)) {
+    const isClickOnStage = stageRef.current.container().contains(e.target);
+    const isClickOnButtons = wrapperRef.current?.contains(e.target);
+
+    // Only clear selection if click is NOT on stage AND NOT on buttons
+    if (!isClickOnStage && !isClickOnButtons) {
       setSelectedShape(null);
       setSelectedTextId(null);
     }
   };
 
   document.addEventListener("mousedown", handleClickOutside);
-
   return () => {
     document.removeEventListener("mousedown", handleClickOutside);
   };
 }, []);
 
-
-  
 
   // Background image
   const [bgImage] = useImage(canvasBg.type === "image" ? canvasBg.src : null);
@@ -137,7 +138,7 @@ useEffect(() => {
   return (
     <div className="relative w-full h-[82%] py-5 flex justify-center items-center">
       {selectedShape !== null && (
-        <div className="absolute top-2 right-2 flex gap-2 z-10">
+        <div ref={wrapperRef}  className="absolute top-2 right-2 flex gap-2 z-10">
           <button onClick={handleDuplicate} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
             Duplicate
           </button>

@@ -1,6 +1,6 @@
 "use client";
 import { Stage, Layer, Rect, Circle, Line, Ellipse, Star, Arrow, Transformer, Image as KonvaImage, Text } from "react-konva";
-import { useState, useRef, useEffect, forwardRef} from "react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 import useImage from "use-image";
 
 // Sticker component
@@ -9,41 +9,47 @@ function Sticker({ shape, ...commonProps }) {
   return <KonvaImage {...commonProps} image={image} width={shape.width || 80} height={shape.height || 80} />;
 }
 
-const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShapes, canvasBg, texts, setTexts, selectedId, setSelectedTextId, textColor }, ref) {
+const BackCanvas = forwardRef(function BackCanvas({
+  canvasSize,
+  shapes,
+  setShapes,
+  canvasBg,
+  texts,
+  setTexts,
+  selectedId,
+  setSelectedTextId,
+  textColor,
+}, ref) {
   const [selectedShape, setSelectedShape] = useState(null);
   const [editingTextId, setEditingTextId] = useState(null);
   const [textValue, setTextValue] = useState("");
   const transformerRef = useRef();
   const layerRef = useRef();
-// Background image for Konva
-  const [bgImage] = useImage(canvasBg?.type === "image" ? canvasBg.src : null);
-
   const stageRef = useRef();
 
+  // Safe background image load
+  const [bgImage] = useImage(canvasBg?.type === "image" ? canvasBg.src : null);
+
   useEffect(() => {
-  if (ref) {
-    ref.current = stageRef.current; 
-  }
-}, [ref, stageRef]);
-
- useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (!stageRef.current) return;
-
-    // Check if the click is outside the stage container
-    if (!stageRef.current.container().contains(e.target)) {
-      setSelectedShape(null);
-      setSelectedTextId(null);
+    if (ref) {
+      ref.current = stageRef.current;
     }
-  };
+  }, [ref, stageRef]);
 
-  document.addEventListener("mousedown", handleClickOutside);
+  // Deselect on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!stageRef.current) return;
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+      if (!stageRef.current.container().contains(e.target)) {
+        setSelectedShape(null);
+        if (typeof setSelectedTextId === "function") setSelectedTextId(null);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setSelectedTextId]);
 
   // Drag handler
   const handleDragEnd = (idx, e) => {
@@ -55,6 +61,7 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
   // Delete
   const handleDelete = () => {
     if (!selectedShape) return;
+
     if (selectedShape.startsWith("shape-")) {
       const idx = Number(selectedShape.split("-")[1]);
       setShapes(shapes.filter((_, i) => i !== idx));
@@ -62,10 +69,11 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
       const textId = Number(selectedShape.split("-")[1]);
       setTexts(texts.filter(t => t.id !== textId));
     }
+
     setSelectedShape(null);
   };
 
-  // Change color
+  // Change color safely
   useEffect(() => {
     if (textColor && selectedId !== null) {
       setTexts(prevTexts =>
@@ -76,7 +84,7 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
         )
       );
     }
-  }, [textColor, selectedId]);
+  }, [textColor, selectedId, setTexts]);
 
   // Duplicate
   const handleDuplicate = () => {
@@ -105,20 +113,20 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
     }
   };
 
-  // Transformer
+  // Transformer update
   useEffect(() => {
     const layer = layerRef.current;
     const tr = transformerRef.current;
 
-    if (selectedShape !== null && tr) {
+    if (selectedShape !== null && tr && layer) {
       const selectedNode = layer.findOne(`#${selectedShape}`);
       if (selectedNode) {
         tr.nodes([selectedNode]);
-        tr.getLayer().batchDraw();
+        tr.getLayer()?.batchDraw();
       }
     } else if (tr) {
       tr.nodes([]);
-      tr.getLayer().batchDraw();
+      tr.getLayer()?.batchDraw();
     }
   }, [selectedShape, shapes, texts]);
 
@@ -143,7 +151,7 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
         onMouseDown={(e) => {
           if (e.target === e.target.getStage()) {
             setSelectedShape(null);
-            setSelectedTextId(null);
+            if (typeof setSelectedTextId === "function") setSelectedTextId(null);
           }
         }}
       >
@@ -154,15 +162,15 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
             y={0}
             width={canvasSize.width}
             height={canvasSize.height}
-            {...(canvasBg.type === "solid"
+            {...(canvasBg?.type === "solid"
               ? { fill: canvasBg.color }
-              : canvasBg.type === "gradient"
+              : canvasBg?.type === "gradient"
               ? {
                   fillLinearGradientStartPoint: { x: 0, y: 0 },
                   fillLinearGradientEndPoint: { x: canvasSize.width, y: 0 },
                   fillLinearGradientColorStops: canvasBg.colors,
                 }
-              : canvasBg.type === "image" && bgImage
+              : canvasBg?.type === "image" && bgImage
               ? {
                   fillPatternImage: bgImage,
                   fillPatternScale: {
@@ -223,9 +231,12 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
               }}
               onClick={() => {
                 setSelectedShape(`text-${t.id}`);
-                setSelectedTextId(t.id);
+                if (typeof setSelectedTextId === "function") setSelectedTextId(t.id);
               }}
-              onTap={() => { setSelectedShape(`text-${t.id}`); setSelectedTextId(t.id); }}
+              onTap={() => {
+                setSelectedShape(`text-${t.id}`);
+                if (typeof setSelectedTextId === "function") setSelectedTextId(t.id);
+              }}
             />
           ))}
 
@@ -241,6 +252,6 @@ const BackCanvas = forwardRef(function BackCanvas({ canvasSize, shapes, setShape
       </Stage>
     </div>
   );
-})
+});
 
-export default BackCanvas
+export default BackCanvas;
