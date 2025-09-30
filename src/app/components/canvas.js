@@ -20,10 +20,10 @@ import Image from 'next/image';
 import stickers from '../../../stickers.json'
 import fonts from '../../../fonts.json'
 import WebFont from "webfontloader";
-// import CanvasArea from './page'
+import CanvasArea from '../book-cover/page'
 import BackCanvas from '../components/back_canvas'
 
-const CanvasArea = dynamic(() => import("../book-cover/page"), { ssr: false });
+// const CanvasArea = dynamic(() => import("../book-cover/page"), { ssr: false });
 
 export default function Booklayout() {
 
@@ -149,6 +149,7 @@ WebFont.load({
 
 // Download canvas
 const handleDownloadFront = () => {
+    console.log("Download front")
   if (!frontCanvasRef.current) return;
   const uri = frontCanvasRef.current.toDataURL({ pixelRatio: 2 });
   const link = document.createElement("a");
