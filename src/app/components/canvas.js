@@ -800,9 +800,11 @@ const handleAddStickerBack = (src) => {
         );
       })}
     </div>
-   <button onClick={() => {if (activeCanvas === "front"){handleDownloadFront();}else{handleDownloadBack();}}} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-  {activeCanvas === "front" ? "Download Front Cover" : "Download Back Cover"}
-</button>
+    {canvas &&(
+        <button onClick={() => {if (activeCanvas === "front"){handleDownloadFront();}else{handleDownloadBack();}}} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+         {activeCanvas === "front" ? "Download Front Cover" : "Download Back Cover"}
+        </button>
+    )} 
 
 
   </div>
